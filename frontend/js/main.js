@@ -1,5 +1,3 @@
-alert("main.js correcto cargado ");
-
 import * as THREE from "./libs/three.module.js";
 import { OrbitControls } from "./libs/OrbitControls.js";
 import { GLTFLoader } from "./libs/GLTFLoader.js";
@@ -7,11 +5,12 @@ import { GLTFLoader } from "./libs/GLTFLoader.js";
 
 //  Escena básica
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xaaaaaa);
-// scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0xaaaaaa); // Fondo gris
+
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1.5, 3);
+camera.position.set(0, 2.1, 1.5);
+
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -41,6 +40,9 @@ loader.load(
 
 //  Controles de cámara
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.6, 0); // <-- punto al que la cámara mira (la cabeza)
+controls.update();
+
 
 //  Animación simple de “hablar”
 let mouthMovement = 0;
