@@ -1,0 +1,27 @@
+# --- Archivos de entorno y credenciales ---
+.env
+*.env
+
+# --- Archivos de caché y temporales ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# --- Entorno virtual ---
+venv/
+env/
+.venv/
+
+# --- Archivos de sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Configuración de VSCode o PyCharm ---
+.vscode/
+.idea/
+.idea
+
+# --- Archivos de uso interno ---
+usage.json
