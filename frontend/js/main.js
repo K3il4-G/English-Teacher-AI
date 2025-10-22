@@ -25,18 +25,36 @@ scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 //  Carga del modelo .glb
 const loader = new GLTFLoader();
 let avatar;
+let mouthMesh;
+
 loader.load(
   "./models/avatar.glb",
   function (gltf) {
+    console.log("GLTF Model:", gltf);
     avatar = gltf.scene;
     avatar.scale.set(1.2, 1.2, 1.2);
     scene.add(avatar);
+
+    // Buscar el mesh que tiene 'mouthOpen'
+    avatar.traverse((child) => {
+      if (
+        child.isMesh &&
+        child.name === "Wolf3D_Head" && // 👈 solo este
+        child.morphTargetDictionary &&
+        "mouthOpen" in child.morphTargetDictionary
+      ) {
+        mouthMesh = child;
+        console.log("Found mouth mesh:", mouthMesh.name);
+      }
+    });
+
   },
   undefined,
   function (error) {
     console.error("Error al cargar el modelo:", error);
   }
 );
+
 
 //  Controles de cámara
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -45,11 +63,12 @@ controls.update();
 
 
 //  Animación simple de “hablar”
-let mouthMovement = 0;
+
 function moveMouth() {
-  if (!avatar) return;
-  mouthMovement = (mouthMovement + 0.1) % Math.PI;
-  avatar.position.y = 0.05 * Math.sin(mouthMovement); // leve movimiento para simular hablar
+  if (!mouthMesh) return;
+  const mouthIndex = mouthMesh.morphTargetDictionary["mouthOpen"];
+  if (mouthIndex === undefined) return;
+  mouthMesh.morphTargetInfluences[mouthIndex] = 0.5 + 0.5 * Math.sin(performance.now() * 0.02);
 }
 
 //  Interfaz simple
