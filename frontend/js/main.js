@@ -117,8 +117,34 @@ button.addEventListener("click", async () => {
   audio.play();
 
   // Mueve la boca mientras se reproduce
-  const mouthInterval = setInterval(moveMouth, 50);
-  audio.onended = () => clearInterval(mouthInterval);
+    // Use Web Audio API for realistic mouth movement
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaElementSource(audio);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function animateMouth() {
+      analyser.getByteFrequencyData(dataArray);
+      const volume = dataArray.reduce((a, b) => a + b) / dataArray.length / 255;
+
+      if (mouthMesh && mouthMesh.morphTargetDictionary["mouthOpen"] !== undefined) {
+        const mouthIndex = mouthMesh.morphTargetDictionary["mouthOpen"];
+        mouthMesh.morphTargetInfluences[mouthIndex] = Math.min(volume * 3, 1);
+      }
+
+      if (!audio.paused && !audio.ended) {
+        requestAnimationFrame(animateMouth);
+      }
+    }
+
+    audio.play();
+    animateMouth();
+
 });
 
 //  Loop de renderizado
