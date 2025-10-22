@@ -31,9 +31,27 @@ loader.load(
   "./models/avatar.glb",
   function (gltf) {
     console.log("GLTF Model:", gltf);
+
+    // 🧩 Log all morph targets in the model ......
+    gltf.scene.traverse((child) => {
+      if (child.isMesh && child.morphTargetDictionary) {
+        console.log(child.name, child.morphTargetDictionary);
+      }
+    });
+
     avatar = gltf.scene;
     avatar.scale.set(1.2, 1.2, 1.2);
     scene.add(avatar);
+
+
+    // Make sure we locate the eyes before blinking
+    findEyes();
+
+    // Start blinking every 5 seconds
+    setInterval(() => {
+      fakeBlink(); // always blink every 5s for now
+    }, 5000);
+
 
     // Buscar el mesh que tiene 'mouthOpen'
     avatar.traverse((child) => {
@@ -56,10 +74,12 @@ loader.load(
 );
 
 
+
 //  Controles de cámara
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 1.6, 0); // <-- punto al que la cámara mira (la cabeza)
 controls.update();
+
 
 
 //  Animación simple de “hablar”
@@ -70,6 +90,73 @@ function moveMouth() {
   if (mouthIndex === undefined) return;
   mouthMesh.morphTargetInfluences[mouthIndex] = 0.5 + 0.5 * Math.sin(performance.now() * 0.02);
 }
+
+
+
+// --- Fake Blink animation (scale eyes) ---
+let leftEye, rightEye;
+
+function findEyes() {
+  avatar.traverse((child) => {
+    if (child.name === "EyeLeft") leftEye = child;
+    if (child.name === "EyeRight") rightEye = child;
+  });
+}
+
+
+
+function fakeBlink() {
+  if (!leftEye || !rightEye) findEyes();
+  if (!leftEye || !rightEye) return;
+
+  const duration = 800; // full blink cycle (ms)
+  const closeTime = 300; // time to close
+  const holdTime = 150;  // eyes stay closed
+  const openTime = 350;  // time to open
+  const start = performance.now();
+
+  function easeInOut(t) {
+    return t < 0.5
+      ? 2 * t * t
+      : -1 + (4 - 2 * t) * t; // smooth cubic easing
+  }
+
+  function animateBlink(now) {
+    const elapsed = now - start;
+    let scaleY = 1;
+
+    if (elapsed < closeTime) {
+      // closing phase
+      const t = elapsed / closeTime;
+      scaleY = 1 - easeInOut(t) * 0.8;
+    } else if (elapsed < closeTime + holdTime) {
+      // hold closed
+      scaleY = 0.2;
+    } else if (elapsed < closeTime + holdTime + openTime) {
+      // opening phase
+      const t = (elapsed - closeTime - holdTime) / openTime;
+      scaleY = 0.2 + easeInOut(t) * 0.8;
+    } else {
+      // fully open again
+      scaleY = 1;
+    }
+
+    leftEye.scale.y = scaleY;
+    rightEye.scale.y = scaleY;
+
+    if (elapsed < duration) {
+      requestAnimationFrame(animateBlink);
+    } else {
+      leftEye.scale.y = 1;
+      rightEye.scale.y = 1;
+    }
+  }
+
+  requestAnimationFrame(animateBlink);
+}
+
+
+
 
 //  Interfaz simple
 const input = document.createElement("input");
