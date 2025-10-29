@@ -96,7 +96,7 @@ loader.load(
     }
 
   function scheduleHeadMovement() {
-    const interval = 15000 + Math.random() * 10000;
+    const interval = 7000 + Math.random() * 10000;
     setTimeout(() => {
       headMovement();
       scheduleHeadMovement();
