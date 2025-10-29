@@ -1,6 +1,8 @@
 import * as THREE from "./libs/three.module.js";
 import { OrbitControls } from "./libs/OrbitControls.js";
 import { GLTFLoader } from "./libs/GLTFLoader.js";
+import { gsap } from "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js";
+
 
 
 //  Escena básica
@@ -40,6 +42,7 @@ loader.load(
     });
 
     avatar = gltf.scene;
+    window.avatar = avatar; // temporal para revisión en consola
     avatar.scale.set(1.2, 1.2, 1.2);
     scene.add(avatar);
 
@@ -65,6 +68,44 @@ loader.load(
         console.log("Found mouth mesh:", mouthMesh.name);
       }
     });
+
+    let head;
+
+    // Buscar el nodo de la cabeza
+    let headBone;
+
+    avatar.traverse((child) => {
+      if (child.name === "Head") {
+        headBone = child;
+      }
+    });
+
+    console.log("Head bone found:", headBone ? headBone.name : "❌ Not found");
+
+    function headMovement() {
+      if (!headBone) return;
+      const angle = (Math.random() * 0.3 - 0.15); // -0.15 a +0.15 rad (~±8.5°)
+      const duration = 1 + Math.random() * 1.5; // 1 a 2.5 s
+      gsap.to(headBone.rotation, {
+        y: angle,
+        duration: duration,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: 1, // ida y vuelta
+      });
+    }
+
+  function scheduleHeadMovement() {
+    const interval = 15000 + Math.random() * 10000;
+    setTimeout(() => {
+      headMovement();
+      scheduleHeadMovement();
+    }, interval);
+  }
+
+    scheduleHeadMovement(); // ⬅️ Llamar una sola vez después de definirla
+
+
 
   },
   undefined,
@@ -154,6 +195,7 @@ function fakeBlink() {
 
   requestAnimationFrame(animateBlink);
 }
+
 
 
 
