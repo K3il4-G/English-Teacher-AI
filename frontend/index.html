@@ -8,13 +8,60 @@
       body {
         margin: 0;
         overflow: hidden;
-        background-color: #000;
+        background-color: #000; /* mantiene fondo de la escena */
+        font-family: 'Segoe UI', sans-serif;
+      }
+
+      /* Contenedor flotante para el botón de micrófono */
+      .mic-container {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 10; /* asegura que quede encima del canvas 3D */
+      }
+
+      #mic-btn {
+        background: #6200ee;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+        transition: transform 0.1s ease;
+      }
+
+      #mic-btn:active {
+        transform: scale(0.95);
+      }
+
+      #output {
+        margin-top: 10px;
+        font-size: 16px;
+        color: white;
+        text-align: center;
+        max-width: 80%;
       }
     </style>
   </head>
   <body>
-    <!-- Aquí se renderiza el avatar 3D -->
+    <!-- Tu avatar 3D -->
     <script type="module" src="./js/main.js"></script>
+
+    <!-- Botón del micrófono -->
+    <div class="mic-container">
+      <button id="mic-btn">🎤</button>
+      <p id="output">Haz clic en el micrófono y empieza a hablar...</p>
+    </div>
+
+    <script src="speech.js"></script>
   </body>
 </html>
+
 
