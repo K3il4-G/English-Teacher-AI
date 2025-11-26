@@ -8,36 +8,44 @@
       body {
         margin: 0;
         overflow: hidden;
-        background-color: #000; /* mantiene fondo de la escena */
+        background-color: #000;
         font-family: 'Segoe UI', sans-serif;
       }
 
-      /* Contenedor flotante para el botón de micrófono */
-      .mic-container {
+      /* Contenedor flotante para barra + botón enviar */
+      .input-container {
         position: absolute;
         bottom: 40px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        z-index: 10; /* asegura que quede encima del canvas 3D */
+        gap: 10px;
+        z-index: 10;
       }
 
-      #mic-btn {
+      #text-input {
+        width: 300px;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+      }
+
+      #send-btn {
         background: #6200ee;
         color: white;
         border: none;
-        border-radius: 50%;
-        width: 80px;
-        height: 80px;
-        font-size: 24px;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 16px;
         cursor: pointer;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
         transition: transform 0.1s ease;
       }
 
-      #mic-btn:active {
+      #send-btn:active {
         transform: scale(0.95);
       }
 
@@ -51,17 +59,69 @@
     </style>
   </head>
   <body>
-    <!-- Tu avatar 3D -->
+    <!-- Avatar 3D -->
     <script type="module" src="./js/main.js"></script>
 
-    <!-- Botón del micrófono -->
-    <div class="mic-container">
-      <button id="mic-btn">🎤</button>
-      <p id="output">Haz clic en el micrófono y empieza a hablar...</p>
+    <!-- Contenedor con barra de texto + botón Enviar -->
+    <div id="input-container" style="
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+    ">
+        <input
+            id="textInput"
+            type="text"
+            placeholder="Escribe aquí..."
+            style="
+                flex: 1;
+                padding: 12px;
+                font-size: 16px;
+                border-radius: 8px;
+                border: 1px solid #aaa;
+            "
+        />
+
+        <button
+            id="btnMic"
+            style="
+                padding: 10px 14px;
+                font-size: 18px;
+                border-radius: 50%;
+                border: none;
+                background: #d32f2f;
+                color: white;
+                cursor: pointer;
+            "
+        >
+            🎤
+        </button>
+
+        <button
+            id="btnSend"
+            style="
+                padding: 10px 20px;
+                font-size: 16px;
+                border-radius: 8px;
+                border: none;
+                background: #1976d2;
+                color: white;
+                cursor: pointer;
+            "
+        >
+            Enviar
+        </button>
     </div>
+
+    <p id="output"></p>
 
     <script src="speech.js"></script>
   </body>
 </html>
-
 
