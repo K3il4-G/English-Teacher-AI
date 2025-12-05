@@ -16,7 +16,7 @@ from server import jack_generate_response
 load_dotenv()
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-VOICE_ID = "pNInz6obpgDQGcFmaJgB"  # ejemplo
+VOICE_ID = "pqHfZKP75CvOlQylNhV4" #"pNInz6obpgDQGcFmaJgB"  # ejemplo
 ELEVEN_API_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
 app = Flask(__name__)

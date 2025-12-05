@@ -244,4 +244,3 @@ window.addEventListener("resize", () => {
 // --------------------
 window.hablar = hablar;
 window.enviarTextoAlServidorYHablar = enviarTextoAlServidorYHablar;
-

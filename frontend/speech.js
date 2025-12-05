@@ -1,4 +1,4 @@
-// speech.js (reemplazar completo)
+// speech.js (versión corregida SIN duplicaciones)
 
 const micBtn = document.getElementById("btnMic");
 const sendBtn = document.getElementById("btnSend");
@@ -14,10 +14,13 @@ if (!SpeechRecognition) {
 } else {
   const recognition = new SpeechRecognition();
   recognition.continuous = false;
-  recognition.interimResults = true;
+  recognition.interimResults = false;
   recognition.lang = "es-ES";
 
   let listening = false;
+
+  // 🔥 NUEVO: evitar que el mismo final se envíe dos veces
+  let lastSent = "";
 
   if (micBtn) {
     micBtn.addEventListener("click", () => {
@@ -34,52 +37,39 @@ if (!SpeechRecognition) {
     });
   }
 
+  let finalTranscript = "";
+
   recognition.onresult = (event) => {
-    let transcript = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
-    }
+    finalTranscript = event.results[0][0].transcript.trim();
 
-    if (output) output.textContent = transcript;
-    if (textInput) textInput.value = transcript;
-
-    // Guardar interacción
-    sendInteractionToBackend(transcript);
-
-    // Hacer que Jack responda y el avatar hable
-    if (window.enviarTextoAlServidorYHablar && typeof window.enviarTextoAlServidorYHablar === "function") {
-      window.enviarTextoAlServidorYHablar(transcript);
-    } else {
-      // fallback: pedir /ask_jack y reproducir TTS localmente
-      fetch("/ask_jack", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_text: transcript })
-      })
-        .then(r => r.json())
-        .then(d => {
-          const reply = d && (d.response || d.reply);
-          if (!reply) return;
-          fetch("/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: reply })
-          })
-            .then(res => res.blob())
-            .then(blob => {
-              const url = URL.createObjectURL(blob);
-              const audio = new Audio(url);
-              audio.play();
-            });
-        })
-        .catch(e => console.error("Fallback /ask_jack error:", e));
-    }
+    if (output) output.textContent = finalTranscript;
+    if (textInput) textInput.value = finalTranscript;
   };
 
+  // Ejecutado cuando usuario deja de hablar o se suelta el botón
   recognition.onend = () => {
-    if (micBtn) micBtn.style.background = "#d32f2f";
+    micBtn.style.background = "#d32f2f";
     listening = false;
-    if (output) output.textContent = "";
+
+    // 🔥 EVITAR DUPLICADOS: si es igual al último, ignorar
+    if (!finalTranscript || finalTranscript === lastSent) {
+      finalTranscript = "";
+      return;
+    }
+
+    // Guardar nuevo texto como "último enviado"
+    lastSent = finalTranscript;
+
+    // Guardar interacción
+    sendInteractionToBackend(finalTranscript);
+
+    // Enviar a Jack una sola vez
+    if (window.enviarTextoAlServidorYHablar) {
+      window.enviarTextoAlServidorYHablar(finalTranscript);
+    }
+
+    output.textContent = "";
+    finalTranscript = "";
   };
 
   recognition.onerror = (e) => {
@@ -116,11 +106,10 @@ if (sendBtn) {
     if (output) output.textContent = text;
     sendInteractionToBackend(text);
 
-    // Pedir a Jack y que el avatar hable (preferimos función expuesta)
     if (window.enviarTextoAlServidorYHablar && typeof window.enviarTextoAlServidorYHablar === "function") {
       window.enviarTextoAlServidorYHablar(text);
     } else {
-      // fallback: pedir /ask_jack + /tts playback
+      // fallback
       fetch("/ask_jack", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -145,11 +134,9 @@ if (sendBtn) {
         .catch(e => console.error("Fallback send error:", e));
     }
 
-    // limpiar input
     if (textInput) textInput.value = "";
   });
 
-  // Enviar con Enter
   if (textInput) {
     textInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -159,5 +146,3 @@ if (sendBtn) {
     });
   }
 }
-
-
