@@ -20,7 +20,8 @@ VOICE_ID = "pqHfZKP75CvOlQylNhV4" #"pNInz6obpgDQGcFmaJgB"  # ejemplo
 ELEVEN_API_URL = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 
 # ===========================================================
