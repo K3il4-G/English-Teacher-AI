@@ -83,7 +83,7 @@ if (!SpeechRecognition) {
 // --- NUEVA FUNCIÓN: enviar texto al backend (guardar interacción) ---
 function sendInteractionToBackend(text) {
   if (!text || !text.trim()) return;
-  fetch("/save_interaction", {
+  fetch("https://english-teacher-ai.onrender.com/save_interaction", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_text: text })
@@ -110,7 +110,7 @@ if (sendBtn) {
       window.enviarTextoAlServidorYHablar(text);
     } else {
       // fallback
-      fetch("/ask_jack", {
+      fetch("https://english-teacher-ai.onrender.com/ask_jack", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_text: text })
@@ -119,7 +119,7 @@ if (sendBtn) {
         .then(d => {
           const reply = d && (d.response || d.reply);
           if (!reply) return;
-          fetch("/tts", {
+          fetch("https://english-teacher-ai.onrender.com/tts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: reply })
