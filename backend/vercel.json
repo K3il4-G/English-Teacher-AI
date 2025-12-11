@@ -2,13 +2,14 @@
   "version": 2,
   "functions": {
     "api/*.py": {
-      "runtime": "python3.11"
+      "runtime": "vercel-python@0.7.1"
     }
   },
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/$1.py",
+      "methods": ["GET", "POST", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://english-teacher-ai-gamma.vercel.app",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
