@@ -104,7 +104,7 @@ controls.update();
 export async function hablar(texto) {
   if (!texto || texto.length === 0) return;
 
-  const response = await fetch("https://english-teacher-ai.onrender.com/tts", { //here used to be the host 5000 : http://127.0.0.1:5000/
+  const response = await fetch("https://english-teacher-ai-backend.vercel.app/api/tts", { //here used to be the host 5000 : http://127.0.0.1:5000/
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: texto }),
@@ -150,7 +150,7 @@ export async function enviarTextoAlServidorYHablar(userText) {
   if (!userText || userText.trim().length === 0) return;
 
   try {
-    const response = await fetch("https://english-teacher-ai.onrender.com/ask_jack", {  // <- CORREGIDO
+    const response = await fetch("https://english-teacher-ai-backend.vercel.app/api/ask_jack", {  // <- CORREGIDO
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_text: userText })
