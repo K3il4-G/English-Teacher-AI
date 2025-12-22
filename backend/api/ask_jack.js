@@ -41,10 +41,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // ✅ MISMO MODELO QUE TU PYTHON
-    const model = "gemini-2.5-flash";
+    // ✅ MODELO PERMITIDO EN REST (FREE)
+    const model = "gemini-1.5-flash";
 
-    // ✅ ENDPOINT CORRECTO (v1beta)
     const url =
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
 
@@ -56,15 +55,14 @@ Help her progress from A1 to C1.
 Be concise, bilingual when useful, and supportive.
 `;
 
+    // ⚠️ system prompt va concatenado
+    const fullPrompt = `${systemPrompt}\n\nUser: ${user_text}`;
+
     const payload = {
       contents: [
         {
-          role: "system",
-          parts: [{ text: systemPrompt }]
-        },
-        {
           role: "user",
-          parts: [{ text: user_text }]
+          parts: [{ text: fullPrompt }]
         }
       ],
       generationConfig: {
