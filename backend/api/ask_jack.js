@@ -1,12 +1,19 @@
 // backend/api/ask_jack.js
 
 export default async function handler(req, res) {
-  // ===============================
-  // 🔐 CORS — SIEMPRE PRIMERO
-  // ===============================
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // ----- CORS -----
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.FRONTEND_ORIGIN || "*"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type"
+  );
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -17,17 +24,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ===============================
-    // 📥 INPUT
-    // ===============================
-    const { user_text } = req.body || {};
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
+
+    const { user_text } = body || {};
+
     if (!user_text || !user_text.trim()) {
       return res.status(400).json({ error: "Texto vacío" });
     }
 
-    // ===============================
-    // 🔑 API KEY
-    // ===============================
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) {
       return res.status(500).json({
@@ -35,16 +42,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // ===============================
-    // 🤖 GEMINI CONFIG
-    // ===============================
-    const model = "gemini-pro"; // estable y recomendado
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${encodeURIComponent(geminiKey)}`;
+    // ✅ MODELO Y ENDPOINT CORRECTOS
+    const url =
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiKey}`;
 
     const systemPrompt =
-      "You are Jack, a short, friendly bilingual English teacher. Answer concisely, correct mistakes gently, and encourage the student.";
+      "You are Jack, a friendly bilingual English teacher. Keep answers short, clear, and helpful.";
 
-    const bodyPayload = {
+    const payload = {
       contents: [
         {
           role: "user",
@@ -61,54 +66,37 @@ export default async function handler(req, res) {
       }
     };
 
-    // ===============================
-    // 🌐 CALL GEMINI
-    // ===============================
     const r = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(bodyPayload)
+      body: JSON.stringify(payload)
     });
 
     if (!r.ok) {
-      const errText = await r.text();
-      console.error("❌ Gemini error:", r.status, errText);
+      const errorText = await r.text();
+      console.error("Gemini error:", r.status, errorText);
       return res.status(500).json({
         error: "Error calling Gemini",
-        detail: errText
+        detail: errorText
       });
     }
 
     const json = await r.json();
 
-    // ===============================
-    // 🧠 EXTRACT TEXT
-    // ===============================
-    let reply = "";
+    const reply =
+      json?.candidates?.[0]?.content?.parts
+        ?.map(p => p.text)
+        .join("") || "No response";
 
-    try {
-      reply =
-        json?.candidates?.[0]?.content?.parts
-          ?.map(p => p.text || "")
-          .join("")
-          .trim() || "";
-    } catch (e) {
-      reply = "";
-    }
-
-    if (!reply) {
-      reply = "Sorry, I couldn't generate a response right now.";
-    }
-
-    // ===============================
-    // ✅ SUCCESS
-    // ===============================
     return res.status(200).json({ response: reply });
 
   } catch (e) {
-    console.error("🔥 ask_jack fatal error:", e);
-    return res.status(500).json({ error: String(e) });
+    console.error("ask_jack fatal error:", e);
+    return res.status(500).json({
+      error: "Internal server error",
+      detail: String(e)
+    });
   }
 }
