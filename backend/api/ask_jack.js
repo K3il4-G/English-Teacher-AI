@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     // ===============================
     // 🤖 GEMINI CONFIG
     // ===============================
-    const model = "gemini-1.5-flash"; // estable y recomendado
+    const model = "gemini-pro"; // estable y recomendado
     const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${encodeURIComponent(geminiKey)}`;
 
     const systemPrompt =
